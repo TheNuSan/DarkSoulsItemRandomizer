@@ -169,6 +169,16 @@ def place_ignored_items(table, item_list):
             log.debug("Placing ignored item ID# " + str(loc_id) + " at location ID# " + str(loc_id))
             table.place_itemlotpart_at_location(item_list[loc_id], loc_id, item_list)
 
+def place_upgrade_items_in_vanilla(table, random_source, item_list):
+    log.info("Placing upgrade items in vanilla.")
+    for loc_id in table.location_dict:
+        loc = table.location_dict[loc_id]
+        if loc.diff in [loc_s.LOC_DIF.UPGRADE, loc_s.LOC_DIF.RANDOM_UPGRADE]:
+            log.debug("Placing upgrade item at location ID# " + str(loc_id))
+            itemlotpart = item_list[loc_id]
+            table.place_itemlotpart_at_location(itemlotpart, loc_id, item_list)
+       
+
 def place_upgrade_items(table, random_source, item_list):
     log.info("Placing upgrade items.")
     for loc_id in table.location_dict:
@@ -371,7 +381,7 @@ def build_table(rand_options, random_source, chr_init_data):
         given_cip = cip.ChrInitParam(chr_inits)
     else:
         given_cip = cip.ChrInitParam.load_from_file_content(chr_init_data)
-    chr_s.randomize_chr_armor(given_cip, rand_options, random_source)
+    #chr_s.randomize_chr_armor(given_cip, rand_options, random_source)
     data_passed_from_chr_init = chr_s.randomize_starting_chr_weapons(given_cip, rand_options, random_source)
     
     for chr_init in given_cip.chr_inits:
@@ -379,7 +389,10 @@ def build_table(rand_options, random_source, chr_init_data):
     
     table = item_t.ItemTable(copy.deepcopy(loc_s.LOCATIONS), copy.deepcopy(shop_s.DEFAULT_SHOP_DATA))
     place_ignored_items(table, item_list)
-    place_upgrade_items(table, random_source, item_list)
+    if rand_options.difficulty == rng_opt.RandOptDifficulty.DISABLED:
+        place_upgrade_items_in_vanilla(table, random_source, item_list)
+    else:
+        place_upgrade_items(table, random_source, item_list)
     place_key_items(table, rand_options, random_source, item_list)
     place_starting_equipment(table, data_passed_from_chr_init, item_list)
     place_non_key_fixed_items(table, rand_options, random_source, item_list)
@@ -405,7 +418,7 @@ if __name__ == "__main__":
       True, 
       True,
       rng_opt.RandOptSoulItemsDifficulty.SHUFFLE,
-      rng_opt.RandOptStartItemsDifficulty.COMBINED_POOL_AND_2H,
+      rng_opt.RandOptStartItemsDifficulty.CRASH_SOULS,
       rng_opt.RandOptGameVersion.PTDE,
       False)
     

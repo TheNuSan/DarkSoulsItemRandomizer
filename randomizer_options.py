@@ -3,6 +3,7 @@ class RandOptDifficulty:
     EASY = 0
     MEDIUM = 1
     HARD = 2
+    DISABLED = 3
     
     @classmethod
     def as_string(cls, diff):
@@ -12,6 +13,8 @@ class RandOptDifficulty:
             return "Unfair"
         elif diff == cls.HARD:
             return "Very Unfair"
+        elif diff == cls.DISABLED:
+            return "Disabled"
         else:
             return ""
 
@@ -38,6 +41,7 @@ class RandOptStartItemsDifficulty:
     SHIELD_AND_1H = 0
     SHIELD_AND_2H = 1
     COMBINED_POOL_AND_2H = 2
+    CRASH_SOULS = 3
     
     @classmethod
     def as_string(cls, diff):
@@ -47,6 +51,8 @@ class RandOptStartItemsDifficulty:
             return "Shield & 1/2H Weapon"
         elif diff == cls.COMBINED_POOL_AND_2H:
             return "Shield/Weapon & Weapon"
+        elif diff == cls.CRASH_SOULS:
+            return "Crash Souls gear"
         else:
             return ""
             
@@ -55,6 +61,7 @@ class RandOptSoulItemsDifficulty:
     SHUFFLE = 0
     CONSUMABLE = 1
     TRANSPOSE = 2
+    DISABLED = 3
     
     @classmethod
     def as_string(cls, diff):
@@ -64,6 +71,8 @@ class RandOptSoulItemsDifficulty:
             return "Replaced"
         elif diff == cls.TRANSPOSE:
             return "Transposed"
+        elif diff == cls.DISABLED:
+            return "Disabled"
         else:
             return ""
             

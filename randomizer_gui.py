@@ -29,7 +29,8 @@ DS1R_GAMEPARAM_PATH_LIST = ["./GameParam.parambnd.dcx", "./param/GameParam/GameP
 DESC_DICT = {
     "diff": {rngopts.RandOptDifficulty.EASY: "* Perfectly fair. Items have an equal chance to be placed anywhere.\n", 
         rngopts.RandOptDifficulty.MEDIUM: "* Slightly biased. Desirable items are not placed in plain view.\n", 
-        rngopts.RandOptDifficulty.HARD: "* Heavily biased. Desirable items are hidden, and are rarely in early areas.\n"},
+        rngopts.RandOptDifficulty.HARD: "* Heavily biased. Desirable items are hidden, and are rarely in early areas.\n",
+        rngopts.RandOptDifficulty.DISABLED: "* Disabled. Items are left at their classic position.\n"},
     "key_diff": {rngopts.RandOptKeyDifficulty.LEAVE_ALONE: ("* Key items are placed in their usual locations.\n" + 
             "  For a player who wants random items without needing to hunt for keys.\n" + 
             "  Some key locations may contain additional items in some seeds.\n\n"),
@@ -46,13 +47,16 @@ DESC_DICT = {
             "  See README for list of locations to check. Read this list ahead of time.\n\n")},
     "souls_diff": {rngopts.RandOptSoulItemsDifficulty.SHUFFLE: "* Soul items are shuffled into the item pool like other items.\n\n",
         rngopts.RandOptSoulItemsDifficulty.CONSUMABLE: "* Lesser soul items are replaced with a random consumable before shuffling.\n\n",
-        rngopts.RandOptSoulItemsDifficulty.TRANSPOSE:  "* Boss souls have a 75% chance to be transposed to one of their boss items.\n\n"},
+        rngopts.RandOptSoulItemsDifficulty.TRANSPOSE:  "* Boss souls have a 75% chance to be transposed to one of their boss items.\n\n",
+        rngopts.RandOptSoulItemsDifficulty.DISABLED:  "* No shuffle of Souls items.\n\n"},
     "start_items": {rngopts.RandOptStartItemsDifficulty.SHIELD_AND_1H: ("* Player starts with random class-usable (L) shield & (R) weapon.\n" + 
             "  The weapon is usable one-handed with base stats.\n\n"),
         rngopts.RandOptStartItemsDifficulty.SHIELD_AND_2H: ("* Player starts with random class-usable (L) shield & (R) weapon.\n" + 
             "  The weapon may need to be two-handed to be usable with base stats.\n\n"),
         rngopts.RandOptStartItemsDifficulty.COMBINED_POOL_AND_2H: ("* Player starts with random class-usable (L) shield OR weapon & (R) weapon.\n" + 
-            "  The weapon(s) may need to be two-handed to be usable with base stats.\n\n")},
+            "  The weapon(s) may need to be two-handed to be usable with base stats.\n\n"),
+        rngopts.RandOptStartItemsDifficulty.CRASH_SOULS: ("* Player starts with Crash Souls gear.\n" + 
+            " it contains a Chloranty ring!.\n\n")},
     "fashion": {True: "* Armor sets ARE NOT kept together during shuffling.\n   Players will typically need to mix-and-match armor pieces.\n",
         False: "* Armor sets ARE kept together during shuffling.\n   Players will be able to find full sets of armor at once.\n"},
     "npc_armor": {True: "* NPCs wear randomly chosen armor instead of their normal sets.\n   If Fashion Souls is on, NPCs will also mix-and-match their armor.\n\n",
@@ -106,8 +110,8 @@ class MainGUI:
         self.style = ttk.Style()
         self.root.title("Dark Souls Item Randomizer v" + VERSION_NUM)
         self.root.resizable(False, False)
-        img = tk.PhotoImage(file=resource_path('favicon.gif'))
-        self.root.call('wm', 'iconphoto', self.root._w, img)
+        #img = tk.PhotoImage(file=resource_path('favicon.gif'))
+        #self.root.call('wm', 'iconphoto', self.root._w, img)
     
         tk.Label(self.root, text="Seed:").grid(row=0, column=0, sticky='E', padx=2)
         self.seed_string = tk.StringVar()
@@ -159,12 +163,17 @@ class MainGUI:
         self.diff_rbutton3 = tk.Radiobutton(self.diff_frame, 
          text=rngopts.RandOptDifficulty.as_string(rngopts.RandOptDifficulty.HARD), 
          variable=self.diff, value=rngopts.RandOptDifficulty.HARD, width=10, anchor=tk.W)
+        self.diff_rbutton4 = tk.Radiobutton(self.diff_frame, 
+         text=rngopts.RandOptDifficulty.as_string(rngopts.RandOptDifficulty.DISABLED), 
+         variable=self.diff, value=rngopts.RandOptDifficulty.DISABLED, width=10, anchor=tk.W)
         self.diff_rbutton1.grid(row=0, column=0, sticky='W')
         self.diff_rbutton2.grid(row=1, column=0, sticky='W')
         self.diff_rbutton3.grid(row=2, column=0, sticky='W')
+        self.diff_rbutton4.grid(row=3, column=0, sticky='W')
         self.setup_hover_events(self.diff_rbutton1, {"diff": rngopts.RandOptDifficulty.EASY})
         self.setup_hover_events(self.diff_rbutton2, {"diff": rngopts.RandOptDifficulty.MEDIUM})
         self.setup_hover_events(self.diff_rbutton3, {"diff": rngopts.RandOptDifficulty.HARD})
+        self.setup_hover_events(self.diff_rbutton4, {"diff": rngopts.RandOptDifficulty.DISABLED})
         
         self.key_diff_frame = tk.LabelFrame(text="Key Placement:")
         self.key_diff_frame.grid(row=3, column=3, rowspan=4, sticky='NS', padx=2)
@@ -206,12 +215,17 @@ class MainGUI:
         self.soul_diff_rbutton3 = tk.Radiobutton(self.soul_frame, 
          text=rngopts.RandOptSoulItemsDifficulty.as_string(rngopts.RandOptSoulItemsDifficulty.TRANSPOSE), 
          variable=self.soul_diff, value=rngopts.RandOptSoulItemsDifficulty.TRANSPOSE, width=10, anchor=tk.W)
+        self.soul_diff_rbutton4 = tk.Radiobutton(self.soul_frame, 
+         text=rngopts.RandOptSoulItemsDifficulty.as_string(rngopts.RandOptSoulItemsDifficulty.DISABLED), 
+         variable=self.soul_diff, value=rngopts.RandOptSoulItemsDifficulty.DISABLED, width=10, anchor=tk.W)
         self.soul_diff_rbutton1.grid(row=0, column=0, sticky='W')
         self.soul_diff_rbutton2.grid(row=1, column=0, sticky='W')
         self.soul_diff_rbutton3.grid(row=2, column=0, sticky='W')
+        self.soul_diff_rbutton4.grid(row=3, column=0, sticky='W')
         self.setup_hover_events(self.soul_diff_rbutton1, {"souls_diff": rngopts.RandOptSoulItemsDifficulty.SHUFFLE})
         self.setup_hover_events(self.soul_diff_rbutton2, {"souls_diff": rngopts.RandOptSoulItemsDifficulty.CONSUMABLE})
         self.setup_hover_events(self.soul_diff_rbutton3, {"souls_diff": rngopts.RandOptSoulItemsDifficulty.TRANSPOSE})
+        self.setup_hover_events(self.soul_diff_rbutton4, {"souls_diff": rngopts.RandOptSoulItemsDifficulty.DISABLED})
         
         self.start_items_frame = tk.LabelFrame(text="Starting Items:")
         self.start_items_frame.grid(row=2, column=4, sticky='NS', padx=2)
@@ -227,12 +241,17 @@ class MainGUI:
         self.start_items_rbutton3 = tk.Radiobutton(self.start_items_frame, 
          text=rngopts.RandOptStartItemsDifficulty.as_string(rngopts.RandOptStartItemsDifficulty.COMBINED_POOL_AND_2H), 
          variable=self.start_items_diff, value=rngopts.RandOptStartItemsDifficulty.COMBINED_POOL_AND_2H, width=20, anchor=tk.W)
+        self.start_items_rbutton4 = tk.Radiobutton(self.start_items_frame, 
+         text=rngopts.RandOptStartItemsDifficulty.as_string(rngopts.RandOptStartItemsDifficulty.CRASH_SOULS), 
+         variable=self.start_items_diff, value=rngopts.RandOptStartItemsDifficulty.CRASH_SOULS, width=20, anchor=tk.W)
         self.start_items_rbutton1.grid(row=0, column=0, sticky='W')
         self.start_items_rbutton2.grid(row=1, column=0, sticky='W')
         self.start_items_rbutton3.grid(row=2, column=0, sticky='W')
+        self.start_items_rbutton4.grid(row=3, column=0, sticky='W')
         self.setup_hover_events(self.start_items_rbutton1, {"start_items": rngopts.RandOptStartItemsDifficulty.SHIELD_AND_1H})
         self.setup_hover_events(self.start_items_rbutton2, {"start_items": rngopts.RandOptStartItemsDifficulty.SHIELD_AND_2H})
         self.setup_hover_events(self.start_items_rbutton3, {"start_items": rngopts.RandOptStartItemsDifficulty.COMBINED_POOL_AND_2H})
+        self.setup_hover_events(self.start_items_rbutton4, {"start_items": rngopts.RandOptStartItemsDifficulty.CRASH_SOULS})
         
         self.fashion_bool = tk.BooleanVar()
         self.fashion_bool.set(True)
@@ -618,12 +637,12 @@ class MainGUI:
             cip_binary_export = randomized_chr_data.export_as_binary()
             
             for index, (file_id, filepath, filedata) in enumerate(content_list):
-                if (filepath == "N:\FRPG\data\INTERROOT_win32\param\GameParam\ItemLotParam.param" or
-                 filepath == "N:\FRPG\data\INTERROOT_x64\param\GameParam\ItemLotParam.param"):
-                    content_list[index] = (file_id, filepath, ilp_binary_export)
-                if (filepath == "N:\FRPG\data\INTERROOT_win32\param\GameParam\ShopLineupParam.param" or
-                 filepath == "N:\FRPG\data\INTERROOT_x64\param\GameParam\ShopLineupParam.param"):
-                    content_list[index] = (file_id, filepath, slp_binary_export)
+                #if (filepath == "N:\FRPG\data\INTERROOT_win32\param\GameParam\ItemLotParam.param" or
+                # filepath == "N:\FRPG\data\INTERROOT_x64\param\GameParam\ItemLotParam.param"):
+                #    content_list[index] = (file_id, filepath, ilp_binary_export)
+                #if (filepath == "N:\FRPG\data\INTERROOT_win32\param\GameParam\ShopLineupParam.param" or
+                # filepath == "N:\FRPG\data\INTERROOT_x64\param\GameParam\ShopLineupParam.param"):
+                #    content_list[index] = (file_id, filepath, slp_binary_export)
                 if (filepath == "N:\FRPG\data\INTERROOT_win32\param\GameParam\CharaInitParam.param" or
                  filepath == "N:\FRPG\data\INTERROOT_x64\param\GameParam\CharaInitParam.param"):
                      content_list[index] = (file_id, filepath, cip_binary_export)
